@@ -1,6 +1,6 @@
 package com.github.mbelling.ws281x;
 
-import com.github.mbelling.ws281x.jni.*;
+import io.restaart.ws281x.jni.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -75,7 +75,7 @@ public class Ws281xLedStrip implements LedStrip {
      * @param brightness  Starting brightness for colors
      * @param pwmChannel  PWM Channel to use
      * @param invert      Whether or not to invert color values
-     * @param stripType   The type of LED Strip {@link com.github.mbelling.ws281x.jni.rpi_ws281xConstants}
+     * @param stripType   The type of LED Strip {@link io.restaart.ws281x.jni.rpi_ws281xConstants}
      * @param clearOnExit Clear LEDs on exit
      */
     public Ws281xLedStrip( int ledsCount, int gpioPin, int frequencyHz, int dma, int brightness, int pwmChannel,

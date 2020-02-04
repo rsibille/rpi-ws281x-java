@@ -23,14 +23,17 @@ BASE_DIR="$(dirname "$0")/../.."
 OUTPUT="${BASE_DIR}/build"
 SWIG_SRC="${BASE_DIR}/src/swig"
 SWIG_OUT="${OUTPUT}/swig"
-SWIG_OUT_JAVA="${OUTPUT}/generatedSource/java/com/github/mbelling/ws281x/jni"
-SWIG_PACKAGE_NAME="com.github.mbelling.ws281x.jni"
+SWIG_OUT_JAVA="${OUTPUT}/generatedSource/java/io.restaart/ws281x/jni"
+SWIG_PACKAGE_NAME="io.restaart.ws281x.jni"
 NATIVE_SRC="${OUTPUT}/ws281x"
 NATIVE_OUT="${NATIVE_SRC}/output"
 NATIVE_LIB_NAME="ws281x.so"
 LIB_BASE_NAME="libws281x"
 WRAPPER_LIB_NAME="${LIB_BASE_NAME}.so"
-
+WORK_RES="/home/pi/restaart/work_res"
+CLASS_DIR="${OUTPUT}/classes"
+JAR_NAME="ws281x-jni.jar"
+WORK_LIB="/home/pi/restaart/work/lib"
 
 # *********************************************************************************************************************
 # Functions
@@ -82,13 +85,13 @@ rm -rf build
 
 # Retrieve rpi_ws281x repository
 echo "Cloning rpi_ws281x repository..."
-git clone https://github.com/jgarff/rpi_ws281x.git ${NATIVE_SRC}
+git clone https://github.com/rsibille/rpi_ws281x.git ${NATIVE_SRC}
 
 # At the time of this writing this repository does not tag versions, so checking out at a specific commit so we build a consistent library
-echo "Checking out specific revision..."
-pushd ${NATIVE_SRC}
-git checkout 6851d9fb090f8a4703d2ceac97da2de617b09e8d
-popd
+#echo "Checking out specific revision..."
+#pushd ${NATIVE_SRC}
+#git checkout c18ce8e801c628154dc52a22270029f8f5d7e514
+#popd
 
 # Create all the required dirs
 echo "Creating required dirs..."
@@ -100,7 +103,6 @@ mkdir -p "${OUTPUT}/nativeLib"
 
 # Building swig wrapper
 echo "Building JNI interface using SWIG..."
-
 swig -java -outdir "${SWIG_OUT_JAVA}" -package "${SWIG_PACKAGE_NAME}" -o "${SWIG_OUT}/rpi_ws281x_wrap.c" "${SWIG_SRC}/rpi_ws281x.i"
 
 
@@ -137,5 +139,14 @@ gcc -pthread -shared -Wl,-O1 -Wl,-Bsymbolic-functions -Wl,-z,relro "${SWIG_OUT}/
 
 echo "Cleaning up intermediate items..."
 rm -rf ${SWIG_OUT} ${NATIVE_SRC} ${NATIVE_OUT}
+
+echo "Copying to Restaart work_res ..."
+cp "${OUTPUT}/nativeLib/${WRAPPER_LIB_NAME}" ${WORK_RES}/${WRAPPER_LIB_NAME}
+cp "${OUTPUT}/nativeLib/${WRAPPER_LIB_NAME}" ${WORK_RES}/linux-arm/${WRAPPER_LIB_NAME}
+
+mkdir ${CLASS_DIR}
+javac -d ${CLASS_DIR} ${SWIG_OUT_JAVA}/*
+jar -cvf ${OUTPUT}/${JAR_NAME} ${CLASS_DIR}/io/restaart/ws281x/jni/*
+cp ${OUTPUT}/${JAR_NAME} ${WORK_LIB}/
 
 echo "Done!"
